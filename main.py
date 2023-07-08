@@ -18,7 +18,7 @@ class Teams:
         self.captain=None
         self.bowler=None
         
-    def select_caption(self, player_name):
+    def select_captain(self, player_name):
         for player in self.players:
             if player.name==player_name:
               self.captain=player_name 
@@ -59,6 +59,12 @@ class Umpire:
         self.wickets={team1.name: 0, team2.name:0}
         self.overs={team1.name: 0, team2.name:0}
     
+    def outcome(self, batsman, bowler):
+        batting_prob=batsman.batting*random.uniform(0.0,1.0)
+        bowling_prob=bowler.bowling*random.uniform(0.0,1.0)
+        outcome=batting_prob-bowling_prob
+        return outcome
+    
     def set_score(self, team, runs_scored):
         self.scores[team]=runs+self.scores[team]
         
@@ -84,12 +90,37 @@ class Match:
         self.umpire=Umpire(team1, team2)
         self.Commentator(self.umpire)
     
+    def change_innings(self, bowling_team, batting_team):
+        # Since it's the batting team's over
+        self.umpire.set_overs(batting_team.name)
+        batsman=batting_team.next_player()
+        
+        while True:
+            # pick a random bowler
+            bowler=random.choice(bowling_team.players)
+            outcome=self.umpire.outcome(batsman, bowler)
+            
+            run=0
+            if (outcome>0.5):
+                runs_scored=random.randint(0,6)
+                self.umpire.set_score(batting_team.name, runs_scored)
+            else:
+                self.umpire.set_wickets(batting_team.name)
+                if self.umpire.wickets[batting_team.name]==len(batting_team.batting_order):
+                    break
+            self.Commentator.comment(batsman, bowler, runs_scored)
+            batsman=batting_team.next_player()
+            
+        print(f"{batting_team.name} ----> {self.umpire.scores[batting_team.name]}")
+            
+        
     def start_match():
+        self.umpire.set_scores={self.team1.name: 0, self.team2.name:0}
+        self.umpire.set_overs={self.team1.name: 0, self.team2.name:0}
+        self.umpire.set_wickets={self.team1.name: 0, self.team2.name:0}
+        self.start_innings(self.team1, self.team2)
+        self.start_innings(self.team2, self.team1)
         
         
-    
-    def change_innings():
-        pass
-    
-    def end_match():
-        pass
+
+   
